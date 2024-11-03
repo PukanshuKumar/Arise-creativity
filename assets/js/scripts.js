@@ -144,5 +144,11 @@ async function editItem(index) {
     }
 }
 
+function toggleDescription(button) {
+    const description = button.previousElementSibling;
+    description.classList.toggle("show_full_text");
+    button.textContent = description.classList.contains("show_full_text") ? "Read Less" : "Read More";
+}
+
 // Initialize data on page load
 init();
