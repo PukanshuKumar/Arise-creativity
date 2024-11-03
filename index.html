@@ -100,7 +100,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
     <script src="assets/js/scripts.js"></script>
 
-
+<!-- 
     <script>
         let editMode = false;
         let editElementId = null;
@@ -197,105 +197,7 @@
             button.textContent = description.classList.contains("show_full_text") ? "Read Less" : "Read More";
         }
 
-    </script>
-
-
-    <!-- <script>
-        let editMode = false;
-        let editElement = null;
-
-        function addItem() {
-            // Get values from the form
-            const title = document.getElementById("txtTitle").value;
-            const author = document.getElementById("txtAuthorName").value;
-            const date = document.getElementById("txtDate").value;
-            const description = document.getElementById("txtDescription").value;
-
-            // Check if we are in edit mode
-            if (editMode) {
-                // Update the existing item
-                editElement.querySelector(".title").textContent = title;
-                editElement.querySelector(".title").setAttribute("title", title);
-                editElement.querySelector(".authorName").textContent = author;
-                editElement.querySelector(".date").textContent = new Date(date).toLocaleDateString();
-                editElement.querySelector(".description").textContent = description;
-
-                // Reset edit mode
-                editMode = false;
-                editElement = null;
-            } else {
-                // Create a new list item element
-                const item = document.createElement("div");
-                item.classList.add("list-group-item", "list-group-item-action");
-
-                // HTML structure for the new item
-                item.innerHTML = `
-                    <div class="d-flex w-100 justify-content-between gap-2">
-                        <h5 class="mb-1 text-truncate title" title="${title}">${title}</h5>
-                        <small class="text-nowrap text-muted small date">${new Date(date).toLocaleDateString()}</small>
-                    </div>
-                    <p class="text-muted small mb-1 authorName">${author}</p>
-                    <p class="mb-1 description">${description}</p>
-                    <button class="toggle-btn btn btn-outline-primary btn-sm mt-2" onclick="toggleDescription(this)">Read More</button>
-                    <button class="btn btn-outline-secondary btn-sm mt-2" onclick="editItem(this)">Edit</button>
-                    <button class="btn btn-outline-danger btn-sm mt-2" onclick="deleteItem(this)">Delete</button>
-                `;
-
-                // Append the item to the list
-                document.getElementById("itemList").appendChild(item);
-            }
-
-            // Clear form fields
-            document.getElementById("form").reset();
-        }
-
-        // Function to delete an item
-        function deleteItem(button) {
-            button.parentElement.remove();
-        }
-
-        // Function to edit an item
-        function editItem(button) {
-            const item = button.parentElement;
-            const title = item.querySelector(".title").textContent;
-            const author = item.querySelector(".authorName").textContent;
-            const description = item.querySelector(".description").textContent;
-            const date = item.querySelector(".date").textContent;
-
-            // Populate the form fields with the item's current values
-            document.getElementById("txtTitle").value = title;
-            document.getElementById("txtAuthorName").value = author;
-            document.getElementById("txtDescription").value = description;
-
-            // Set the date input correctly by parsing the displayed date back to the input format
-            const parsedDate = new Date(date);
-            const formattedDate = parsedDate.toISOString().split('T')[0];
-            document.getElementById("txtDate").value = formattedDate;
-
-            // Set edit mode
-            editMode = true;
-            editElement = item;
-        }
-
-        // Optional: Function to toggle description (expand/collapse)
-        function toggleDescription(button) {
-            const description = button.previousElementSibling;
-            description.classList.toggle("show_full_text");
-            button.textContent = description.classList.contains("show_full_text") ? "Read More" : "Read Less";
-        }
     </script> -->
 
-    <!-- <script>
-        function toggleDescription(button) {
-          const description = button.previousElementSibling;
-          description.classList.toggle("show_full_text");
-
-          if (description.classList.contains("show_full_text")) {
-            button.textContent = "Read Less";
-          } else {
-            button.textContent = "Read More";
-          }
-        }
-      </script> -->
 </body>
 </html>
