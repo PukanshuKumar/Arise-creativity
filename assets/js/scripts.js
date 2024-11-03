@@ -80,6 +80,7 @@ async function init() {
                         </div>
                         <p class="text-muted small mb-1 authorName">${item.author}</p>
                         <p class="mb-1 description">${item.description}</p>
+                        <button class="toggle-btn btn btn-outline-primary btn-sm mt-2" onclick="toggleDescription(this)">Read More</button>
                         <button class="btn btn-outline-secondary btn-sm mt-2" onclick="editItem(${index})">Edit</button>
                         <button class="btn btn-outline-danger btn-sm mt-2" onclick="removeItem(${index})">Delete</button>
                     `;
