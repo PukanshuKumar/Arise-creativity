@@ -1,24 +1,45 @@
 const apiKey = '$2a$10$Pl.97PqwynzEkdLT31QVO.GVmhtDMcsArdEo9w7mV.eTgjqlRI2Qy'; // Replace with your JSONBin API key
-const binId = '67276085acd3cb34a8a1c31b'; // Replace with your JSONBin ID
+const binId = '67276085acd3cb34a8a1c31b'; // Your actual Bin ID
 
 async function fetchItems() {
-    const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
-        headers: { 'X-Master-Key': apiKey }
-    });
-    const data = await response.json();
-    return data.record || []; // return an empty array if no data found
+    try {
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+            headers: { 'X-Master-Key': apiKey }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error fetching items: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.record || []; // return an empty array if no data found
+    } catch (error) {
+        console.error(error);
+        alert('Failed to fetch items. Check console for details.');
+        return [];
+    }
 }
 
 async function saveData(data) {
-    const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Master-Key': apiKey
-        },
-        body: JSON.stringify(data)
-    });
-    return response.json();
+    try {
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': apiKey
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error saving data: ${response.statusText}`);
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error(error);
+        alert('Failed to save data. Check console for details.');
+    }
 }
 
 async function deleteData(index) {
@@ -29,6 +50,7 @@ async function deleteData(index) {
 
 async function init() {
     const itemList = document.getElementById('itemList');
+    itemList.innerHTML = ''; // Clear the list before populating
     const items = await fetchItems();
 
     items.forEach((item, index) => {
@@ -62,6 +84,8 @@ async function removeItem(index) {
     init(); // Refresh item list
 }
 
+let currentEditIndex = null; // Track which item is being edited
+
 async function editItem(index) {
     const items = await fetchItems();
     const item = items[index];
@@ -69,19 +93,35 @@ async function editItem(index) {
     document.getElementById('txtAuthorName').value = item.author;
     document.getElementById('txtDescription').value = item.description;
 
-    // When updating, replace the existing item instead of pushing a new one
-    const form = document.getElementById('dataForm');
-    form.onsubmit = async (event) => {
-        event.preventDefault();
-        items[index] = {
+    currentEditIndex = index; // Set the current index being edited
+}
+
+// Handle updating the item
+document.getElementById('dataForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    if (currentEditIndex !== null) {
+        const items = await fetchItems();
+        items[currentEditIndex] = {
             title: document.getElementById('txtTitle').value,
             author: document.getElementById('txtAuthorName').value,
             description: document.getElementById('txtDescription').value,
         };
         await saveData(items);
-        init();
-        form.reset();
-    };
-}
+        currentEditIndex = null; // Reset edit index
+    } else {
+        // Add new item logic
+        const title = document.getElementById('txtTitle').value;
+        const author = document.getElementById('txtAuthorName').value;
+        const description = document.getElementById('txtDescription').value;
+
+        const items = await fetchItems();
+        items.push({ title, author, description });
+        await saveData(items);
+    }
+
+    init(); // Refresh item list
+    document.getElementById('dataForm').reset(); // Clear form
+});
 
 init(); // Initialize data on page load
