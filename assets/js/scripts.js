@@ -1,4 +1,4 @@
-const apiKey = 'https://api.jsonbin.io/v3/b/67276085acd3cb34a8a1c31b'; // Replace with your JSONBin API key
+const apiKey = '$2a$10$Pl.97PqwynzEkdLT31QVO.GVmhtDMcsArdEo9w7mV.eTgjqlRI2Qy'; // Replace with your JSONBin API key
 const binId = '67276085acd3cb34a8a1c31b'; // Replace with your JSONBin ID
 
 async function fetchItems() {
