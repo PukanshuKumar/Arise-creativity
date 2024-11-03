@@ -27,7 +27,7 @@
                               Featured
                             </div>
                             <div class="card-body">
-                                <form class="row g-3 needs-validation" id="form" novalidate>
+                                <form class="row g-3 needs-validation" id="dataForm" novalidate>
                                     <div class="col-md-12">
                                       <label for="txtTitle" class="form-label">Title</label>
                                       <input type="text" class="form-control" id="txtTitle">
@@ -158,7 +158,7 @@
             }
 
             // Clear form fields
-            document.getElementById("form").reset();
+            document.getElementById("dataForm").reset();
         }
 
         // Function to delete an item
@@ -196,6 +196,7 @@
             description.classList.toggle("show_full_text");
             button.textContent = description.classList.contains("show_full_text") ? "Read Less" : "Read More";
         }
+
     </script>
 
 
