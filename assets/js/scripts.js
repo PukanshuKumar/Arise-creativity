@@ -12,8 +12,8 @@ async function fetchItems() {
         }
 
         const data = await response.json();
-        // Ensure we return an empty array if record is not an array
-        return Array.isArray(data.record) ? data.record : [];
+        // Access the items array inside the data object
+        return Array.isArray(data.record.items) ? data.record.items : [];
     } catch (error) {
         console.error(error);
         alert('Failed to fetch items. Check console for details.');
@@ -29,7 +29,7 @@ async function saveData(data) {
                 'Content-Type': 'application/json',
                 'X-Master-Key': apiKey
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({ items: data }) // Wrap data in an object
         });
 
         if (!response.ok) {
