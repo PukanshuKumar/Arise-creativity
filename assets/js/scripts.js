@@ -1,6 +1,7 @@
 const apiKey = '$2a$10$Pl.97PqwynzEkdLT31QVO.GVmhtDMcsArdEo9w7mV.eTgjqlRI2Qy'; // Replace with your JSONBin API key
 const binId = '67276085acd3cb34a8a1c31b'; // Your actual Bin ID
 
+// Function to fetch items from JSONBin
 async function fetchItems() {
     try {
         const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
@@ -12,6 +13,8 @@ async function fetchItems() {
         }
 
         const data = await response.json();
+
+        console.log(data);
         // Access the items array inside the data object
         return Array.isArray(data.record.items) ? data.record.items : [];
     } catch (error) {
@@ -21,6 +24,7 @@ async function fetchItems() {
     }
 }
 
+// Function to save data back to JSONBin
 async function saveData(data) {
     try {
         const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
@@ -35,7 +39,7 @@ async function saveData(data) {
         if (!response.ok) {
             throw new Error(`Error saving data: ${response.statusText}`);
         }
-
+        console.log(response.json());
         return response.json();
     } catch (error) {
         console.error(error);
@@ -43,6 +47,7 @@ async function saveData(data) {
     }
 }
 
+// Function to delete an item by index
 async function deleteData(index) {
     const items = await fetchItems();
     if (Array.isArray(items)) {
@@ -51,6 +56,7 @@ async function deleteData(index) {
     }
 }
 
+// Function to initialize data on page load
 async function init() {
     const itemList = document.getElementById('itemList');
     itemList.innerHTML = ''; // Clear the list before populating
@@ -74,6 +80,7 @@ async function init() {
     }
 }
 
+// Event listener for the form submission
 document.getElementById('dataForm').addEventListener('submit', async (event) => {
     event.preventDefault();
     const title = document.getElementById('txtTitle').value;
@@ -91,13 +98,16 @@ document.getElementById('dataForm').addEventListener('submit', async (event) => 
     }
 });
 
+// Function to remove an item by index
 async function removeItem(index) {
     await deleteData(index);
     init(); // Refresh item list
 }
 
-let currentEditIndex = null; // Track which item is being edited
+// Global variable to track the current edit index
+let currentEditIndex = null;
 
+// Function to edit an item by index
 async function editItem(index) {
     const items = await fetchItems();
     if (Array.isArray(items)) {
@@ -127,21 +137,12 @@ document.getElementById('dataForm').addEventListener('submit', async (event) => 
             await saveData(items);
             currentEditIndex = null; // Reset edit index
         }
-    } else {
-        // Add new item logic
-        const title = document.getElementById('txtTitle').value;
-        const author = document.getElementById('txtAuthorName').value;
-        const description = document.getElementById('txtDescription').value;
-
-        const items = await fetchItems();
-        if (Array.isArray(items)) {
-            items.push({ title, author, description });
-            await saveData(items);
-        }
     }
 
-    init(); // Refresh item list
-    document.getElementById('dataForm').reset(); // Clear form
+    // Refresh the item list and clear the form
+    init();
+    document.getElementById('dataForm').reset();
 });
 
-init(); // Initialize data on page load
+// Initialize data on page load
+init();
