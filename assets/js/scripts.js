@@ -70,10 +70,14 @@ async function init() {
 
     // Ensure items is an array
     if (Array.isArray(items)) {
-        items.forEach((item, index) => {
+        // items.forEach((item, index) => {
+        //     const div = document.createElement('div');
+        for (let i = items.length - 1; i >= 0; i--) {
+            const item = items[i];
             const div = document.createElement('div');
-            div.classList.add('list-group-item', 'list-group-item-action', 'p-0');
+            div.classList.add('col-md-6');
             div.innerHTML = `
+                        <div class="card">
                         <div class="card-body">
                             <div class="d-flex w-100 justify-content-between gap-2">
                                 <h5 class="mb-1 text-truncate title" title="${item.title}">${item.title}</h5>
@@ -84,12 +88,13 @@ async function init() {
                         </div>
                         <div class="card-footer">
                             <button class="toggle-btn btn btn-outline-primary btn-sm mt-2" onclick="toggleDescription(this)">Read More</button>
-                            <button class="btn btn-outline-secondary btn-sm mt-2" onclick="editItem(${index})">Edit</button>
-                            <button class="btn btn-outline-danger btn-sm mt-2" onclick="removeItem(${index})">Delete</button>
+                            <button class="btn btn-outline-secondary btn-sm mt-2" onclick="editItem(${i})">Edit</button>
+                            <button class="btn btn-outline-danger btn-sm mt-2" onclick="removeItem(${i})">Delete</button>
+                        </div>
                         </div>
                     `;
             itemList.appendChild(div);
-        });
+        };
     } else {
         console.warn('Fetched items are not an array:', items);
     }
@@ -156,7 +161,8 @@ async function editItem(index) {
 }
 
 function toggleDescription(button) {
-    const description = button.previousElementSibling;
+    // const description = button.previousElementSibling;
+    const description = button.closest('.card').querySelector('.description');
     description.classList.toggle("show_full_text");
     button.textContent = description.classList.contains("show_full_text") ? "Read Less" : "Read More";
 }

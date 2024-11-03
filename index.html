@@ -21,20 +21,17 @@
         <main class="flex-fill">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="card">
                             <div class="card-header">
                               Featured
                             </div>
                             <div class="card-body">
                                 <form class="row g-3 needs-validation" id="dataForm" novalidate>
-                                    <div class="col-md-12">
-                                      <label for="txtTitle" class="form-label">Title</label>
-                                      <input type="text" class="form-control" id="txtTitle">
-                                      <div class="valid-feedback">
-                                        Looks good!
-                                      </div>
-                                    </div>
+                                  <div class="col-md-12">
+                                    <label for="txtDescription" class="form-label">Description</label>
+                                    <textarea class="form-control" id="txtDescription" rows="3"></textarea>
+                                  </div>
                                     <div class="col-xl-6 col-md-6">
                                       <label for="txtAuthorName" class="form-label">Author Name</label>
                                       <input type="text" class="form-control" id="txtAuthorName">
@@ -42,7 +39,7 @@
                                         Looks good!
                                       </div>
                                     </div>
-                                    <div class="col-xl-3 col-md-6">
+                                    <div class="col-xl-6 col-md-6">
                                       <label for="txtDate" class="form-label">Date</label>
                                       <input type="date" class="form-control" id="txtDate" >
                                       <div class="invalid-feedback">
@@ -50,9 +47,13 @@
                                       </div>
                                     </div>
                                     <div class="col-md-12">
-                                        <label for="txtDescription" class="form-label">Description</label>
-                                        <textarea class="form-control" id="txtDescription" rows="3"></textarea>
+                                      <label for="txtTitle" class="form-label">Title</label>
+                                      <input type="text" class="form-control" id="txtTitle">
+                                      <div class="valid-feedback">
+                                        Looks good!
                                       </div>
+                                    </div>
+
                                     <div class="col-12">
                                         <button class="btn btn-primary" type="button" onclick="addItem()">Submit form</button>
                                     </div>
@@ -60,11 +61,17 @@
                             </div>
                           </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-8">
+                      <div class="form-group mb-3">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search items..." oninput="searchItems()">
+                      </div>
+                      <div class="row g-3" id="itemList">
+
+                      </div>
                         <!-- List -->
-                        <div class="list-group" id="itemList">
+                        <!-- <div class="list-group" id="itemList"> -->
                             <!-- Items will be added here dynamically -->
-                        </div>
+                        <!-- </div> -->
                     </div>
                 </div>
             </div>
