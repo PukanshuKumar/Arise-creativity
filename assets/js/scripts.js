@@ -12,11 +12,12 @@ async function fetchItems() {
         }
 
         const data = await response.json();
-        return data.record || []; // return an empty array if no data found
+        // Ensure we return an empty array if record is not an array
+        return Array.isArray(data.record) ? data.record : [];
     } catch (error) {
         console.error(error);
         alert('Failed to fetch items. Check console for details.');
-        return [];
+        return []; // Return an empty array on error
     }
 }
 
@@ -44,8 +45,10 @@ async function saveData(data) {
 
 async function deleteData(index) {
     const items = await fetchItems();
-    items.splice(index, 1); // Remove item at index
-    await saveData(items); // Save updated array
+    if (Array.isArray(items)) {
+        items.splice(index, 1); // Remove item at index
+        await saveData(items); // Save updated array
+    }
 }
 
 async function init() {
@@ -53,17 +56,22 @@ async function init() {
     itemList.innerHTML = ''; // Clear the list before populating
     const items = await fetchItems();
 
-    items.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.innerHTML = `
-            <h5>${item.title}</h5>
-            <p>${item.author}</p>
-            <p>${item.description}</p>
-            <button onclick="editItem(${index})">Edit</button>
-            <button onclick="removeItem(${index})">Delete</button>
-        `;
-        itemList.appendChild(div);
-    });
+    // Ensure items is an array
+    if (Array.isArray(items)) {
+        items.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <h5>${item.title}</h5>
+                <p>${item.author}</p>
+                <p>${item.description}</p>
+                <button onclick="editItem(${index})">Edit</button>
+                <button onclick="removeItem(${index})">Delete</button>
+            `;
+            itemList.appendChild(div);
+        });
+    } else {
+        console.warn('Fetched items are not an array:', items);
+    }
 }
 
 document.getElementById('dataForm').addEventListener('submit', async (event) => {
@@ -73,10 +81,14 @@ document.getElementById('dataForm').addEventListener('submit', async (event) => 
     const description = document.getElementById('txtDescription').value;
 
     const items = await fetchItems();
-    items.push({ title, author, description }); // Add new item
-    await saveData(items); // Save data to JSONBin
-    init(); // Refresh item list
-    document.getElementById('dataForm').reset(); // Clear form
+    if (Array.isArray(items)) {
+        items.push({ title, author, description }); // Add new item
+        await saveData(items); // Save data to JSONBin
+        init(); // Refresh item list
+        document.getElementById('dataForm').reset(); // Clear form
+    } else {
+        console.warn('Could not add item, fetched items are not an array:', items);
+    }
 });
 
 async function removeItem(index) {
@@ -88,12 +100,16 @@ let currentEditIndex = null; // Track which item is being edited
 
 async function editItem(index) {
     const items = await fetchItems();
-    const item = items[index];
-    document.getElementById('txtTitle').value = item.title;
-    document.getElementById('txtAuthorName').value = item.author;
-    document.getElementById('txtDescription').value = item.description;
+    if (Array.isArray(items)) {
+        const item = items[index];
+        document.getElementById('txtTitle').value = item.title;
+        document.getElementById('txtAuthorName').value = item.author;
+        document.getElementById('txtDescription').value = item.description;
 
-    currentEditIndex = index; // Set the current index being edited
+        currentEditIndex = index; // Set the current index being edited
+    } else {
+        console.warn('Could not edit item, fetched items are not an array:', items);
+    }
 }
 
 // Handle updating the item
@@ -102,13 +118,15 @@ document.getElementById('dataForm').addEventListener('submit', async (event) => 
 
     if (currentEditIndex !== null) {
         const items = await fetchItems();
-        items[currentEditIndex] = {
-            title: document.getElementById('txtTitle').value,
-            author: document.getElementById('txtAuthorName').value,
-            description: document.getElementById('txtDescription').value,
-        };
-        await saveData(items);
-        currentEditIndex = null; // Reset edit index
+        if (Array.isArray(items)) {
+            items[currentEditIndex] = {
+                title: document.getElementById('txtTitle').value,
+                author: document.getElementById('txtAuthorName').value,
+                description: document.getElementById('txtDescription').value,
+            };
+            await saveData(items);
+            currentEditIndex = null; // Reset edit index
+        }
     } else {
         // Add new item logic
         const title = document.getElementById('txtTitle').value;
@@ -116,8 +134,10 @@ document.getElementById('dataForm').addEventListener('submit', async (event) => 
         const description = document.getElementById('txtDescription').value;
 
         const items = await fetchItems();
-        items.push({ title, author, description });
-        await saveData(items);
+        if (Array.isArray(items)) {
+            items.push({ title, author, description });
+            await saveData(items);
+        }
     }
 
     init(); // Refresh item list
