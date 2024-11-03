@@ -6,6 +6,7 @@ let currentEditIndex = null;
 
 // Function to fetch items from JSONBin
 async function fetchItems() {
+    console.log('fetchItems');
     try {
         const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
             headers: { 'X-Master-Key': apiKey }
@@ -26,6 +27,8 @@ async function fetchItems() {
 
 // Function to save data back to JSONBin
 async function saveData(data) {
+    console.log('saveData');
+
     try {
         const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
             method: 'PUT',
@@ -48,6 +51,8 @@ async function saveData(data) {
 
 // Function to delete an item by index
 async function deleteData(index) {
+    console.log('deleteData');
+
     const items = await fetchItems();
     if (Array.isArray(items)) {
         items.splice(index, 1);
@@ -57,6 +62,8 @@ async function deleteData(index) {
 
 // Function to initialize data on page load
 async function init() {
+    console.log('init');
+
     const itemList = document.getElementById('itemList');
     itemList.innerHTML = ''; // Clear the list before populating
     const items = await fetchItems();
@@ -85,6 +92,8 @@ async function init() {
 
 // Function to add a new item or update an existing item
 async function addItem() {
+    console.log('addItem');
+
     const title = document.getElementById("txtTitle").value;
     const author = document.getElementById("txtAuthorName").value;
     let date = document.getElementById("txtDate").value || new Date().toISOString().split('T')[0]; // Default to today if no date provided
@@ -110,12 +119,16 @@ async function addItem() {
 
 // Function to remove an item by index
 async function removeItem(index) {
+    console.log('removeItem');
+
     await deleteData(index);
     init(); // Refresh item list
 }
 
 // Function to edit an item by index
 async function editItem(index) {
+    console.log('editItem');
+
     const items = await fetchItems();
     if (Array.isArray(items)) {
         const item = items[index];
