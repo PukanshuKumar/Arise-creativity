@@ -1,0 +1,16 @@
+html,body {
+    height: 100vh;
+}
+
+.description {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: all ease 500ms;
+}
+
+.description.show_full_text {
+    -webkit-line-clamp: none;
+    transition: all ease 500ms;
+}
