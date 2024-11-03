@@ -65,27 +65,6 @@
                         <div class="list-group" id="itemList">
                             <!-- Items will be added here dynamically -->
                         </div>
-
-                        <!-- <div class="list-group">
-                            <div class="list-group-item list-group-item-action " >
-                              <div class="d-flex w-100 justify-content-between gap-2">
-                                <h5 class="mb-1 text-truncate title" title="">List group item heading</h5>
-                                <small class="text-nowrap text-muted small">3 days ago</small>
-                              </div>
-                              <p class="text-muted small mb-1">testste stest</p>
-                              <p class="mb-1 description">Some placeholder content in a paragraph.List group item headingList group item headingList group item headingList group item heading</p>
-                              <button class="toggle-btn btn btn-outline-primary btn-sm mt-2" onclick="toggleDescription(this)">Read More</button>
-                            </div>
-                            <div class="list-group-item list-group-item-action " >
-                              <div class="d-flex w-100 justify-content-between gap-2">
-                                <h5 class="mb-1 text-truncate title" title="">List group item heading</h5>
-                                <small class="text-nowrap text-muted small">3 days ago</small>
-                              </div>
-                              <p class="text-muted small mb-1">testste stest</p>
-                              <p class="mb-1 description">Some placeholder content in a paragraph.List group item headingList group item headingList group item headingList group item heading</p>
-                              <button class="toggle-btn btn btn-outline-primary btn-sm mt-2" onclick="toggleDescription(this)">Read More</button>
-                            </div>
-                          </div> -->
                     </div>
                 </div>
             </div>
@@ -99,105 +78,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
     <script src="assets/js/scripts.js"></script>
-
-<!-- 
-    <script>
-        let editMode = false;
-        let editElementId = null;
-
-        function addItem() {
-            // Get values from the form
-            const title = document.getElementById("txtTitle").value;
-            const author = document.getElementById("txtAuthorName").value;
-            let date = document.getElementById("txtDate").value;
-            const description = document.getElementById("txtDescription").value;
-
-            // If date is not selected, use today's date in yyyy-mm-dd format
-            if (!date) {
-                const today = new Date();
-                date = today.toISOString().split('T')[0]; // Format as yyyy-mm-dd
-            }
-
-            // Generate a unique ID for each item
-            const uniqueId = editMode ? editElementId : `item-${Date.now()}`;
-
-            // Check if we are in edit mode
-            if (editMode) {
-                // Update the existing item using the unique ID
-                const editElement = document.querySelector(`[data-id="${uniqueId}"]`);
-                editElement.querySelector(".title").textContent = title;
-                editElement.querySelector(".title").setAttribute("title", title);
-                editElement.querySelector(".authorName").textContent = author;
-                editElement.querySelector(".date").textContent = date;
-                editElement.querySelector(".description").textContent = description;
-
-                // Reset edit mode
-                editMode = false;
-                editElementId = null;
-            } else {
-                // Create a new list item element
-                const item = document.createElement("div");
-                item.classList.add("list-group-item", "list-group-item-action");
-                item.setAttribute("data-id", uniqueId);  // Assign the unique ID to the element
-
-                // HTML structure for the new item
-                item.innerHTML = `
-                    <div class="d-flex w-100 justify-content-between gap-2">
-                        <h5 class="mb-1 text-truncate title" title="${title}">${title}</h5>
-                        <small class="text-nowrap text-muted small date">${date}</small>
-                    </div>
-                    <p class="text-muted small mb-1 authorName">${author}</p>
-                    <p class="mb-1 description">${description}</p>
-                    <button class="toggle-btn btn btn-outline-primary btn-sm mt-2" onclick="toggleDescription(this)">Read More</button>
-                    <button class="btn btn-outline-secondary btn-sm mt-2" onclick="editItem('${uniqueId}')">Edit</button>
-                    <button class="btn btn-outline-danger btn-sm mt-2" onclick="deleteItem('${uniqueId}')">Delete</button>
-                `;
-
-                // Append the item to the list
-                document.getElementById("itemList").appendChild(item);
-            }
-
-            // Clear form fields
-            document.getElementById("dataForm").reset();
-        }
-
-        // Function to delete an item
-        function deleteItem(id) {
-            const item = document.querySelector(`[data-id="${id}"]`);
-            if (item) item.remove();
-        }
-
-        // Function to edit an item
-        function editItem(id) {
-            const item = document.querySelector(`[data-id="${id}"]`);
-            if (!item) return;
-
-            const title = item.querySelector(".title").textContent;
-            const author = item.querySelector(".authorName").textContent;
-            const description = item.querySelector(".description").textContent;
-            const date = item.querySelector(".date").textContent;
-
-            // Populate the form fields with the item's current values
-            document.getElementById("txtTitle").value = title;
-            document.getElementById("txtAuthorName").value = author;
-            document.getElementById("txtDescription").value = description;
-
-            // Set the date input to the same date without converting to local timezone
-            document.getElementById("txtDate").value = date;
-
-            // Set edit mode and store the element's unique ID
-            editMode = true;
-            editElementId = id;
-        }
-
-        // Optional: Function to toggle description (expand/collapse)
-        function toggleDescription(button) {
-            const description = button.previousElementSibling;
-            description.classList.toggle("show_full_text");
-            button.textContent = description.classList.contains("show_full_text") ? "Read Less" : "Read More";
-        }
-
-    </script> -->
 
 </body>
 </html>

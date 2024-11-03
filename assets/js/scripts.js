@@ -72,17 +72,21 @@ async function init() {
     if (Array.isArray(items)) {
         items.forEach((item, index) => {
             const div = document.createElement('div');
-            div.classList.add('list-group-item', 'list-group-item-action');
+            div.classList.add('list-group-item', 'list-group-item-action', 'p-0');
             div.innerHTML = `
-                        <div class="d-flex w-100 justify-content-between gap-2">
-                            <h5 class="mb-1 text-truncate title" title="${item.title}">${item.title}</h5>
-                            <small class="text-nowrap text-muted small">${item.date}</small>
+                        <div class="card-body">
+                            <div class="d-flex w-100 justify-content-between gap-2">
+                                <h5 class="mb-1 text-truncate title" title="${item.title}">${item.title}</h5>
+                                <small class="text-nowrap text-muted small">${item.date}</small>
+                            </div>
+                            <p class="text-muted small mb-1 authorName">${item.author}</p>
+                            <p class="mb-1 description">${item.description}</p>
                         </div>
-                        <p class="text-muted small mb-1 authorName">${item.author}</p>
-                        <p class="mb-1 description">${item.description}</p>
-                        <button class="toggle-btn btn btn-outline-primary btn-sm mt-2" onclick="toggleDescription(this)">Read More</button>
-                        <button class="btn btn-outline-secondary btn-sm mt-2" onclick="editItem(${index})">Edit</button>
-                        <button class="btn btn-outline-danger btn-sm mt-2" onclick="removeItem(${index})">Delete</button>
+                        <div class="card-footer">
+                            <button class="toggle-btn btn btn-outline-primary btn-sm mt-2" onclick="toggleDescription(this)">Read More</button>
+                            <button class="btn btn-outline-secondary btn-sm mt-2" onclick="editItem(${index})">Edit</button>
+                            <button class="btn btn-outline-danger btn-sm mt-2" onclick="removeItem(${index})">Delete</button>
+                        </div>
                     `;
             itemList.appendChild(div);
         });
@@ -95,10 +99,17 @@ async function init() {
 async function addItem() {
     console.log('addItem');
 
-    const title = document.getElementById("txtTitle").value;
+    let title = document.getElementById("txtTitle").value;
     const author = document.getElementById("txtAuthorName").value;
     let date = document.getElementById("txtDate").value || new Date().toISOString().split('T')[0]; // Default to today if no date provided
     const description = document.getElementById("txtDescription").value;
+
+    // If the title is empty, set it to the first 80 characters of the description followed by "..."
+    if (!title && description) {
+        console.log("80 characters");
+        title = description.substring(0, 80) + (description.length > 80 ? "..." : "");
+    }
+
 
     const items = await fetchItems();
     if (Array.isArray(items)) {
@@ -145,7 +156,6 @@ async function editItem(index) {
 }
 
 function toggleDescription(button) {
-    console.log('lasdflka');
     const description = button.previousElementSibling;
     description.classList.toggle("show_full_text");
     button.textContent = description.classList.contains("show_full_text") ? "Read Less" : "Read More";
