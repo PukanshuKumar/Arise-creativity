@@ -1,34 +1,31 @@
 const apiKey = '$2a$10$Pl.97PqwynzEkdLT31QVO.GVmhtDMcsArdEo9w7mV.eTgjqlRI2Qy'; // Replace with your JSONBin API key
 const binId = '67276085acd3cb34a8a1c31b'; // Your actual Bin ID
+// const binId = '672a4a5aad19ca34f8c4b376'; // Your actual Bin ID
 
-// Global variable to track the current edit index
 let currentEditIndex = null;
+let currentPage = 1;
+const itemsPerPage = 4;
+let filteredItems = [];
 
-// Function to fetch items from JSONBin
-async function fetchItems() {
-    console.log('fetchItems');
+// Fetch items from JSONBin (optionally include deleted items)
+async function fetchItems(includeDeleted = false) {
     try {
         const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
             headers: { 'X-Master-Key': apiKey }
         });
-
-        if (!response.ok) {
-            throw new Error(`Error fetching items: ${response.statusText}`);
-        }
-
+        if (!response.ok) throw new Error(`Error fetching items: ${response.statusText}`);
         const data = await response.json();
-        return Array.isArray(data.record.items) ? data.record.items : [];
+        // Filter out items marked as deleted unless includeDeleted is true
+        return Array.isArray(data.record.items) ? data.record.items.filter(item => includeDeleted || !item.deleted) : [];
     } catch (error) {
         console.error(error);
-        alert('Failed to fetch items. Check console for details.');
+        alert('Failed to fetch items.');
         return [];
     }
 }
 
-// Function to save data back to JSONBin
+// Save data back to JSONBin
 async function saveData(data) {
-    console.log('saveData');
-
     try {
         const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
             method: 'PUT',
@@ -38,72 +35,77 @@ async function saveData(data) {
             },
             body: JSON.stringify({ items: data })
         });
-
-        if (!response.ok) {
-            throw new Error(`Error saving data: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`Error saving data: ${response.statusText}`);
         return response.json();
     } catch (error) {
         console.error(error);
-        alert('Failed to save data. Check console for details.');
+        alert('Failed to save data.');
     }
 }
 
-// Function to delete an item by index
-async function deleteData(index) {
-    console.log('deleteData');
+// Function to update existing items with unique IDs
+async function updateItemsWithUniqueIds() {
+    const items = await fetchItems(true); // Fetch all items, including deleted ones
+    const updatedItems = items.map(item => {
+        if (!item.id) { // Check if the item already has an ID
+            item.id = 'id-' + Math.random().toString(36).substr(2, 9); // Generate a unique ID
+        }
+        return item;
+    });
 
-    const items = await fetchItems();
-    if (Array.isArray(items)) {
-        items.splice(index, 1);
+    await saveData(updatedItems); // Save the updated items back to the database
+    console.log("Updated items with unique IDs:", updatedItems);
+}
+
+// Call this function once to update existing items
+updateItemsWithUniqueIds();
+
+
+// Permanently delete items marked as deleted
+async function permanentlyDeleteMarkedItems() {
+    console.log('Permanently deleting all marked items');
+    const items = await fetchItems(true); // Fetch all items, including deleted ones
+    const itemsToKeep = items.filter(item => !item.deleted); // Filter out items marked as deleted
+    await saveData(itemsToKeep);
+    console.log("Permanently deleted items marked as deleted");
+    init(); // Refresh item list
+}
+
+// Soft-delete function (visible delete for the user)
+async function removeItem(id) {
+    console.log('Attempting to remove item with ID:', id);
+    const items = await fetchItems(true); // Fetch all items, including deleted ones
+
+    const itemToRemove = items.find(item => item.id === id); // Find item by ID
+
+    if (itemToRemove) {
+        itemToRemove.deleted = true; // Mark item as deleted
         await saveData(items);
+        console.log('Item marked as deleted:', itemToRemove);
+        init(); // Refresh item list
+    } else {
+        console.warn('No item found with ID:', id);
     }
 }
 
-// Function to initialize data on page load
-async function init() {
-    console.log('init');
-
-    const itemList = document.getElementById('itemList');
-    itemList.innerHTML = ''; // Clear the list before populating
-    const items = await fetchItems();
-
-    // Ensure items is an array
-    if (Array.isArray(items)) {
-        // items.forEach((item, index) => {
-        //     const div = document.createElement('div');
-        for (let i = items.length - 1; i >= 0; i--) {
-            const item = items[i];
-            const div = document.createElement('div');
-            div.classList.add('col-md-6');
-            div.innerHTML = `
-                        <div class="card">
-                        <div class="card-body">
-                            <div class="d-flex w-100 justify-content-between gap-2">
-                                <h5 class="mb-1 text-truncate title" title="${item.title}">${item.title}</h5>
-                                <small class="text-nowrap text-muted small">${item.date}</small>
-                            </div>
-                            <p class="text-muted small mb-1 authorName">${item.author}</p>
-                            <p class="mb-1 description">${item.description}</p>
-                        </div>
-                        <div class="card-footer">
-                            <button class="toggle-btn btn btn-outline-primary btn-sm mt-2" onclick="toggleDescription(this)">Read More</button>
-                            <button class="btn btn-outline-secondary btn-sm mt-2" onclick="editItem(${i})">Edit</button>
-                            <button class="btn btn-outline-danger btn-sm mt-2" onclick="removeItem(${i})">Delete</button>
-                        </div>
-                        </div>
-                    `;
-            itemList.appendChild(div);
-        };
-    } else {
-        console.warn('Fetched items are not an array:', items);
-    }
+// Restore all items marked as deleted
+async function restoreAllDeletedItems() {
+    console.log('Restoring all deleted items');
+    const items = await fetchItems(true); // Fetch all items, including deleted ones
+    const restoredItems = items.map(item => {
+        if (item.deleted) {
+            item.deleted = false; // Unmark item as deleted
+        }
+        return item;
+    });
+    await saveData(restoredItems);
+    console.log("Restored all items that were marked as deleted.");
+    init(); // Refresh item list
 }
 
 // Function to add a new item or update an existing item
 async function addItem() {
     console.log('addItem');
-
     let title = document.getElementById("txtTitle").value;
     const author = document.getElementById("txtAuthorName").value;
     let date = document.getElementById("txtDate").value || new Date().toISOString().split('T')[0]; // Default to today if no date provided
@@ -115,16 +117,22 @@ async function addItem() {
         title = description.substring(0, 80) + (description.length > 80 ? "..." : "");
     }
 
-
-    const items = await fetchItems();
+    const items = await fetchItems(true);
     if (Array.isArray(items)) {
+        const newItem = {
+            id: 'id-' + Math.random().toString(36).substr(2, 9), // Generate a unique ID
+            title,
+            author,
+            date,
+            description,
+            deleted: false
+        };
+
         if (currentEditIndex !== null) {
-            // Update existing item
-            items[currentEditIndex] = { title, author, date, description };
-            currentEditIndex = null; // Reset edit index
+            items[currentEditIndex] = newItem; // Update existing item
+            currentEditIndex = null;
         } else {
-            // Add new item
-            items.push({ title, author, date, description });
+            items.push(newItem); // Add new item
         }
         await saveData(items);
         init(); // Refresh item list
@@ -134,38 +142,160 @@ async function addItem() {
     }
 }
 
-// Function to remove an item by index
-async function removeItem(index) {
-    console.log('removeItem');
-
-    await deleteData(index);
-    init(); // Refresh item list
-}
-
 // Function to edit an item by index
-async function editItem(index) {
+async function editItem(id) {
     console.log('editItem');
-
-    const items = await fetchItems();
+    const items = await fetchItems(true); // Fetch all items, including deleted ones
     if (Array.isArray(items)) {
-        const item = items[index];
-        document.getElementById('txtTitle').value = item.title;
-        document.getElementById('txtAuthorName').value = item.author;
-        document.getElementById('txtDate').value = item.date;
-        document.getElementById('txtDescription').value = item.description;
-
-        currentEditIndex = index; // Set the current index being edited
+        const item = items.find(item => item.id === id); // Find item by ID
+        if (item) {
+            document.getElementById('txtTitle').value = item.title;
+            document.getElementById('txtAuthorName').value = item.author;
+            document.getElementById('txtDate').value = item.date;
+            document.getElementById('txtDescription').value = item.description;
+            currentEditIndex = items.indexOf(item); // Set the current index being edited
+        }
     } else {
         console.warn('Could not edit item, fetched items are not an array:', items);
     }
 }
 
+// Display items with pagination and search filters
+function displayItems() {
+    const itemList = document.getElementById('itemList');
+    itemList.innerHTML = ''; // Clear the list
+
+    const itemCount = filteredItems.length; // Get the count of filtered items
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+
+    // Reverse the filtered items to show the newest first
+    const itemsToShow = filteredItems.slice().reverse().slice(start, end);
+
+    itemsToShow.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.classList.add('col-md-6');
+        div.innerHTML = `
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex w-100 justify-content-between gap-2">
+                        <h5 class="mb-1 text-truncate title" title="${item.title}">${item.title}</h5>
+                        <small class="text-nowrap text-muted small">${item.date}</small>
+                    </div>
+                    <p class="text-muted small mb-1 authorName">${item.author}</p>
+                    <p class="mb-1 description">${item.description}</p>
+                </div>
+                <div class="card-footer">
+                    <button class="toggle-btn btn btn-outline-primary btn-sm mt-2" onclick="toggleDescription(this)">Read More</button>
+                    <button class="btn btn-outline-secondary btn-sm mt-2" onclick="editItem('${item.id}')">Edit</button>
+                    <button class="btn btn-outline-danger btn-sm mt-2" onclick="removeItem('${item.id}')">Delete</button>
+                </div>
+            </div>
+        `;
+        itemList.appendChild(div);
+    });
+
+    renderPagination(); // Update pagination controls
+}
+
+
+// Render pagination controls
+function renderPagination() {
+    const paginationContainer = document.querySelector('.pagination');
+    paginationContainer.innerHTML = ''; // Clear current pagination
+
+    const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+    // Hide pagination if there's only one page
+    if (totalPages <= 1) return paginationContainer.classList.add('d-none');
+    paginationContainer.classList.remove('d-none');
+
+    // "Previous" button
+    const prevButton = document.createElement('li');
+    prevButton.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+    prevButton.innerHTML = `<button class="page-link" onclick="prevPage()">Previous</button>`;
+    paginationContainer.appendChild(prevButton);
+
+    // Calculate start and end page numbers for pagination links
+    let startPage, endPage;
+    if (currentPage === 1) {
+        // Case when on the first page
+        startPage = 1;
+        endPage = Math.min(3, totalPages);
+    } else if (currentPage === totalPages) {
+        // Case when on the last page
+        startPage = Math.max(totalPages - 2, 1);
+        endPage = totalPages;
+    } else {
+        // General case for pages in the middle
+        startPage = currentPage - 1;
+        endPage = currentPage + 1;
+    }
+
+    // Create page number links
+    for (let i = startPage; i <= endPage; i++) {
+        const pageItem = document.createElement('li');
+        pageItem.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        pageItem.innerHTML = `<button class="page-link" onclick="goToPage(${i})">${i}</button>`;
+        paginationContainer.appendChild(pageItem);
+    }
+
+    // "Next" button
+    const nextButton = document.createElement('li');
+    nextButton.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+    nextButton.innerHTML = `<button class="page-link" onclick="nextPage()">Next</button>`;
+    paginationContainer.appendChild(nextButton);
+}
+
+// Pagination control functions
+function prevPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        displayItems();
+    }
+}
+
+function nextPage() {
+    const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+    if (currentPage < totalPages) {
+        currentPage++;
+        displayItems();
+    }
+}
+
+function goToPage(page) {
+    currentPage = page;
+    displayItems();
+}
+
+// Search functionality
+function searchItems() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    fetchItems().then((items) => {
+        filteredItems = items.filter(item =>
+            item.title.toLowerCase().includes(query) ||
+            item.description.toLowerCase().includes(query) ||
+            item.author.toLowerCase().includes(query)
+        );
+        currentPage = 1; // Reset to first page on new search
+        displayItems();
+    });
+}
+
+
+
+// Initialize data on page load
+async function init() {
+    const items = await fetchItems();
+    filteredItems = items; // Initialize with all non-deleted items
+    displayItems(); // Display paginated items
+}
+
+// Call the initialization function on window load
+window.onload = init;
+
 function toggleDescription(button) {
-    // const description = button.previousElementSibling;
     const description = button.closest('.card').querySelector('.description');
     description.classList.toggle("show_full_text");
     button.textContent = description.classList.contains("show_full_text") ? "Read Less" : "Read More";
 }
-
-// Initialize data on page load
-init();
