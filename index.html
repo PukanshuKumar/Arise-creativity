@@ -10,6 +10,10 @@
 </head>
 
 <body>
+  <div class="box-loader d-none" id="box-loader">
+    <div class="loader-icon"></div>
+  </div>
+
   <div class="d-flex flex-column h-100">
     <header>
       <div class="container">
@@ -30,7 +34,7 @@
           <div class="col-md-4 order-md-1 order-2">
             <div class="card">
               <div class="card-header">
-                Featured
+                Add Item
               </div>
               <div class="card-body">
                 <form class="row g-3 needs-validation" id="dataForm" novalidate>
@@ -61,7 +65,7 @@
                   </div>
 
                   <div class="col-12">
-                    <button class="btn btn-primary" type="button" onclick="addItem()">Submit form</button>
+                    <button class="btn btn-primary" type="button" id="submitBtn" onclick="addItem()">Add</button>
                   </div>
                 </form>
               </div>

@@ -6,9 +6,13 @@ let currentEditIndex = null;
 let currentPage = 1;
 const itemsPerPage = 4;
 let filteredItems = [];
+const loader = document.getElementById('box-loader');
+
 
 // Fetch items from JSONBin (optionally include deleted items)
 async function fetchItems(includeDeleted = false) {
+    loader.classList.remove('d-none'); // Show the loader
+
     try {
         const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
             headers: { 'X-Master-Key': apiKey }
@@ -21,6 +25,8 @@ async function fetchItems(includeDeleted = false) {
         console.error(error);
         alert('Failed to fetch items.');
         return [];
+    } finally {
+        loader.classList.add('d-none'); // Hide the loader
     }
 }
 
@@ -63,12 +69,14 @@ updateItemsWithUniqueIds();
 
 // Permanently delete items marked as deleted
 async function permanentlyDeleteMarkedItems() {
+    loader.classList.remove('d-none'); // Show the loader
     console.log('Permanently deleting all marked items');
     const items = await fetchItems(true); // Fetch all items, including deleted ones
     const itemsToKeep = items.filter(item => !item.deleted); // Filter out items marked as deleted
     await saveData(itemsToKeep);
     console.log("Permanently deleted items marked as deleted");
     init(); // Refresh item list
+    loader.classList.add('d-none'); // hide the loader
 }
 
 // Soft-delete function (visible delete for the user)
@@ -90,6 +98,7 @@ async function removeItem(id) {
 
 // Restore all items marked as deleted
 async function restoreAllDeletedItems() {
+    loader.classList.remove('d-none'); // Show the loader
     console.log('Restoring all deleted items');
     const items = await fetchItems(true); // Fetch all items, including deleted ones
     const restoredItems = items.map(item => {
@@ -101,11 +110,17 @@ async function restoreAllDeletedItems() {
     await saveData(restoredItems);
     console.log("Restored all items that were marked as deleted.");
     init(); // Refresh item list
+    loader.classList.add('d-none'); // hide the loader
 }
 
 // Function to add a new item or update an existing item
 async function addItem() {
     console.log('addItem');
+        // Show spinner and disable button
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`;
+        submitBtn.disabled = true;
+
     let title = document.getElementById("txtTitle").value;
     const author = document.getElementById("txtAuthorName").value;
     let date = document.getElementById("txtDate").value || new Date().toISOString().split('T')[0]; // Default to today if no date provided
@@ -140,6 +155,10 @@ async function addItem() {
     } else {
         console.warn('Could not add item, fetched items are not an array:', items);
     }
+
+    // Reset button text and enable button
+    submitBtn.innerHTML = `Add`;
+    submitBtn.disabled = false;
 }
 
 // Function to edit an item by index
@@ -249,23 +268,29 @@ function renderPagination() {
 
 // Pagination control functions
 function prevPage() {
+    loader.classList.remove('d-none'); // Show the loader
     if (currentPage > 1) {
         currentPage--;
         displayItems();
+        loader.classList.add('d-none'); // hide the loader
     }
 }
 
 function nextPage() {
+    loader.classList.remove('d-none'); // Show the loader
     const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
     if (currentPage < totalPages) {
         currentPage++;
         displayItems();
+        loader.classList.add('d-none'); // hide the loader
     }
 }
 
 function goToPage(page) {
+    loader.classList.remove('d-none'); // Show the loader
     currentPage = page;
     displayItems();
+    loader.classList.add('d-none'); // hide the loader
 }
 
 // Search functionality
