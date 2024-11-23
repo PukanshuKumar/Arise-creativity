@@ -82,3 +82,49 @@ html,body {
       transform: rotate(360deg);
     }
   }
+
+  .M_title_wrappper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+}
+
+.M_title_wrappper .title {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.M_title_wrappper::before ,.M_title_wrappper::after{
+  content: "";
+  width: 100%;
+  display: block;
+  border-bottom: 1px solid #afafaf;
+  height: 2px;
+}
+
+.quotes-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.quotes-list .quote-item {
+  flex: 1 0 calc(33.33% - 1rem);
+}
+
+@media only screen and (max-width: 768px) {
+
+  .quotes-list .quote-item {
+    flex: 1 0 calc(50% - 1rem);
+  }
+}
+
+@media only screen and (max-width: 500px) {
+
+  .quotes-list .quote-item {
+    flex: 1 0 100%;
+  }
+}

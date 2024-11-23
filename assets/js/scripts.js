@@ -182,6 +182,9 @@ async function editItem(id) {
 // Display items with pagination and search filters
 function displayItems() {
     const itemList = document.getElementById('itemList');
+    if(!itemList){
+        return
+    }
     itemList.innerHTML = ''; // Clear the list
 
     const itemCount = filteredItems.length; // Get the count of filtered items
@@ -324,3 +327,64 @@ function toggleDescription(button) {
     description.classList.toggle("show_full_text");
     button.textContent = description.classList.contains("show_full_text") ? "Read Less" : "Read More";
 }
+
+
+// Function to implement infinite scrolling
+async function loadQuotesOnScroll() {
+    const quotesContainer = document.getElementById('quotes'); // Ensure a container with ID 'quotes' exists in the HTML
+    let pageIndex = 0; // Start from the first page of quotes
+    const batchSize = 12; // Number of quotes to load per batch
+    let isFetching = false; // Prevent duplicate fetches while loading
+
+    async function fetchAndAppendQuotes() {
+        if (isFetching) return; // Exit if already fetching
+        isFetching = true;
+
+        const items = await fetchItems(); // Fetch all non-deleted items
+        const startIndex = pageIndex * batchSize;
+        const endIndex = startIndex + batchSize;
+
+        const itemsToShow = items.slice().reverse().slice(startIndex, endIndex); // Reverse for newest first
+        itemsToShow.forEach(item => {
+            const div = document.createElement('div');
+            div.classList.add('quote-item');
+            div.innerHTML = `
+                <div class="card border-start border-0 border-primary shadow border-3">
+                    <div class="card-body">
+                        <p class="mb-1">${item.description}</p>
+                        <p class="text-primary small mb-1 fst-italic authorName">${item.author}</p>
+                    </div>
+                </div>
+            `;
+            quotesContainer.appendChild(div);
+        });
+
+        if (endIndex >= items.length) {
+            // Stop listening to scroll when all items are loaded
+            window.removeEventListener('scroll', handleScroll);
+        } else {
+            pageIndex++; // Increment to the next batch
+        }
+
+        isFetching = false; // Allow next fetch
+    }
+
+    async function handleScroll() {
+        const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+
+        if (scrollHeight - scrollTop <= clientHeight + 100) {
+            // If near the bottom, fetch and append more quotes
+            await fetchAndAppendQuotes();
+        }
+    }
+
+    // Start loading quotes and add scroll event listener
+    await fetchAndAppendQuotes();
+    window.addEventListener('scroll', handleScroll);
+}
+
+// Ensure a div with ID 'quotes' exists in your HTML
+// <div id="quotes" class="row"></div>
+
+// Call the function to initialize infinite scrolling
+loadQuotesOnScroll();
