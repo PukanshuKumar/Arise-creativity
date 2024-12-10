@@ -77,9 +77,10 @@
             </div>
           </div>
           <div class="col-md-8 order-md-2 order-1">
-            <div class="form-group mb-3">
-              <input type="text" class="form-control" id="searchInput" placeholder="Search items..."
+            <div class="form-group d-flex mb-3">
+              <input type="search" class="form-control flex-grow-1 " id="searchInput" placeholder="Search items..."
                 oninput="searchItems()">
+                <button class="btn btn-primary flex-shrink-0 ms-3" type="button" id="searchBtn" onclick="searchItems()">Search</button>
             </div>
             <div class="row g-3" id="itemList">
 

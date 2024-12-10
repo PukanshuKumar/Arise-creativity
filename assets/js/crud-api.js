@@ -34,8 +34,18 @@ let currentPage = 1;
 const itemsPerPage = 4;
 let filteredItems = [];
 const loader = document.getElementById('box-loader');
+const ctaButton = document.getElementById('submitBtn');
+let isUpdating = true;
 
 
+
+async function updateButtons() {
+    if (isUpdating === true) {
+        ctaButton.textContent = "Update"
+    }else{
+        ctaButton.textContent = "Add"
+    }
+}
 async function checkForDuplicates(title, description) {
     try {
       const querySnapshot = await getDocs(collection(db, 'items'));
@@ -198,7 +208,9 @@ async function addItem() {
       newItem.id = currentEditIndex; // Use the ID from editing context
       const docRef = doc(db, 'items', newItem.id);
       await updateDoc(docRef, newItem);
+      isUpdating = false;
       alert('Item updated successfully');
+      updateButtons();
     } else {
       // Add logic
       const docRef = await addDoc(collection(db, 'items'), newItem);
@@ -246,7 +258,8 @@ async function editItem(id) {
       document.getElementById('txtAuthorName').value = item.authorName || '';
       document.getElementById('txtDate').value = item.date || '';
       document.getElementById('txtDescription').value = item.description || '';
-
+      isUpdating = true;
+      updateButtons();
       currentEditIndex = id; // Track index for editing
     } catch (error) {
       console.error("Error editing item:", error);
