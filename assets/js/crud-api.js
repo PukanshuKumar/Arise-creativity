@@ -124,15 +124,15 @@ async function updateItemsWithUniqueIds() {
 // Soft-delete function (visible delete for the user)
 async function removeItem(id) {
     try {
-        const docRef = doc(db, "items", id);
-        await updateDoc(docRef, { deleted: true });
-        console.log(`Document with ID ${id} marked as deleted.`);
-        init(); // Refresh item list
+      const docRef = doc(db, "items", id);
+      await updateDoc(docRef, { deleted: true });
+      alert("Item successfully deleted.");
+      init();
     } catch (error) {
-        console.error("Error deleting item:", error);
+      console.error("Error in deleting item:", error);
     }
-}
-window.removeItem = removeItem;
+  }
+  window.removeItem = removeItem;
 
 
 async function permanentlyDeleteMarkedItems() {
@@ -173,92 +173,126 @@ async function addItem() {
     const date = document.getElementById("txtDate").value || new Date().toISOString().split('T')[0];
     const description = document.getElementById("txtDescription").value;
 
+    if (!title || !description) {
+      alert("Both title and description fields are required.");
+      return;
+    }
+
     const isDuplicate = await checkForDuplicates(title, description);
+
     if (isDuplicate) {
       alert("An item with this title and description already exists.");
       return;
     }
 
     const newItem = {
-        title: title || description.substring(0, 80),
-        authorName,
-        date,
-        description,
-        deleted: false
+      title,
+      authorName,
+      date,
+      description,
+      deleted: false,
     };
 
-    if (currentEditIndex !== null) {
-        newItem.id = filteredItems[currentEditIndex].id; // Use the existing ID for editing
-    }
-
-    await saveData(newItem); // Save the new or updated item to Firestore
-    currentEditIndex = null; // Reset editing state
-    init(); // Refresh item list
-    document.getElementById('dataForm').reset(); // Clear form
-}
-window.addItem = addItem;
-
-
-// Function to edit an item by index
-async function editItem(id) {
-    console.log('editItem');
-    const items = await fetchItems(true); // Fetch all items, including deleted ones
-    if (Array.isArray(items)) {
-        const item = items.find(item => item.id === id); // Find item by ID
-        if (item) {
-            document.getElementById('txtTitle').value = item.title;
-            document.getElementById('txtAuthorName').value = item.authorName;
-            document.getElementById('txtDate').value = item.date;
-            document.getElementById('txtDescription').value = item.description;
-            currentEditIndex = items.indexOf(item); // Set the current index being edited
-        }
+    if (currentEditIndex) {
+      // Editing logic
+      newItem.id = currentEditIndex; // Use the ID from editing context
+      const docRef = doc(db, 'items', newItem.id);
+      await updateDoc(docRef, newItem);
+      alert('Item updated successfully');
     } else {
-        console.warn('Could not edit item, fetched items are not an array:', items);
+      // Add logic
+      const docRef = await addDoc(collection(db, 'items'), newItem);
+      alert(`New item added with ID: ${docRef.id}`);
     }
-}
-window.editItem = editItem;
+
+    currentEditIndex = null; // Reset editing index
+    init(); // Refresh items
+    document.getElementById('dataForm').reset(); // Clear the form
+  }
+  window.addItem = addItem;
+
+
+// // Function to edit an item by index
+// async function editItem(id) {
+//     console.log('editItem');
+//     const items = await fetchItems(true); // Fetch all items, including deleted ones
+//     if (Array.isArray(items)) {
+//         const item = items.find(item => item.id === id); // Find item by ID
+//         if (item) {
+//             document.getElementById('txtTitle').value = item.title;
+//             document.getElementById('txtAuthorName').value = item.authorName;
+//             document.getElementById('txtDate').value = item.date;
+//             document.getElementById('txtDescription').value = item.description;
+//             currentEditIndex = items.indexOf(item); // Set the current index being edited
+//         }
+//     } else {
+//         console.warn('Could not edit item, fetched items are not an array:', items);
+//     }
+// }
+// window.editItem = editItem;
+
+async function editItem(id) {
+    try {
+      const docRef = doc(db, 'items', id);
+      const docSnapshot = await getDoc(docRef);
+
+      if (!docSnapshot.exists()) {
+        alert('Item not found');
+        return;
+      }
+
+      const item = docSnapshot.data();
+      document.getElementById('txtTitle').value = item.title || '';
+      document.getElementById('txtAuthorName').value = item.authorName || '';
+      document.getElementById('txtDate').value = item.date || '';
+      document.getElementById('txtDescription').value = item.description || '';
+
+      currentEditIndex = id; // Track index for editing
+    } catch (error) {
+      console.error("Error editing item:", error);
+    }
+  }
+  window.editItem = editItem;
+
 
 
 // Display items with pagination and search filters
 function displayItems() {
     const itemList = document.getElementById('itemList');
-    if(!itemList){
-        return
-    }
-    itemList.innerHTML = ''; // Clear the list
+    if (!itemList) return;
 
-    const itemCount = filteredItems.length; // Get the count of filtered items
+    itemList.innerHTML = '';
+
+    const visibleItems = filteredItems.filter(item => !item.deleted); // Exclude deleted items
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
 
-    // Reverse the filtered items to show the newest first
-    const itemsToShow = filteredItems.slice().reverse().slice(start, end);
+    const itemsToShow = visibleItems.slice().reverse().slice(start, end);
 
-    itemsToShow.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.classList.add('col-md-6');
-        div.innerHTML = `
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex w-100 justify-content-between gap-2">
-                        <h5 class="mb-1 text-truncate title" title="${item.title}">${item.title}</h5>
-                        <small class="text-nowrap text-muted small">${item.date}</small>
-                    </div>
-                    <p class="text-muted small mb-1 authorName">${item.authorName}</p>
-                    <p class="mb-1 description">${item.description}</p>
-                </div>
-                <div class="card-footer">
-                    <button class="toggle-btn btn btn-outline-primary btn-sm mt-2" onclick="toggleDescription(this)">Read More</button>
-                    <button class="btn btn-outline-secondary btn-sm mt-2" onclick="editItem('${item.id}')">Edit</button>
-                    <button class="btn btn-outline-danger btn-sm mt-2" onclick="removeItem('${item.id}')">Delete</button>
-                </div>
+    itemsToShow.forEach(item => {
+      const div = document.createElement('div');
+      div.classList.add('col-md-6');
+      div.innerHTML = `
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex w-100 justify-content-between gap-2">
+              <h5 class="mb-1 text-truncate title" title="${item.title}">${item.title}</h5>
+              <small class="text-nowrap text-muted small">${item.date}</small>
             </div>
-        `;
-        itemList.appendChild(div);
+            <p class="text-muted small mb-1 authorName">${item.authorName}</p>
+            <p class="mb-1 description">${item.description}</p>
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-outline-secondary btn-sm mt-2" onclick="editItem('${item.id}')">Edit</button>
+            <button class="btn btn-outline-danger btn-sm mt-2" onclick="removeItem('${item.id}')">Delete</button>
+          </div>
+        </div>
+      `;
+      itemList.appendChild(div);
     });
 
-    renderPagination(); // Update pagination controls
-}
+    renderPagination();
+  }
 
 
 // Render pagination controls
@@ -364,13 +398,13 @@ window.searchItems = searchItems;
 
 // Initialize data on page load
 async function init() {
+    loader.classList.remove('d-none');
     const items = await fetchItems();
-    filteredItems = items; // Initialize with all non-deleted items
-    displayItems(); // Display paginated items
-}
+    filteredItems = items;
+    displayItems();
+    loader.classList.add('d-none');
+  }
 
-// Call the initialization function on window load
-window.onload = init;
 
 function toggleDescription(button) {
     const description = button.closest('.card').querySelector('.description');
