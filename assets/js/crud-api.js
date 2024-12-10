@@ -283,6 +283,7 @@ function displayItems() {
             <p class="mb-1 description">${item.description}</p>
           </div>
           <div class="card-footer">
+            <button class="toggle-btn btn btn-outline-primary btn-sm mt-2" onclick="toggleDescription(this)">Read More</button>
             <button class="btn btn-outline-secondary btn-sm mt-2" onclick="editItem('${item.id}')">Edit</button>
             <button class="btn btn-outline-danger btn-sm mt-2" onclick="removeItem('${item.id}')">Delete</button>
           </div>
