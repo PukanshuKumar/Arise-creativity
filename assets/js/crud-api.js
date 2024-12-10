@@ -46,13 +46,14 @@ async function updateButtons() {
         ctaButton.textContent = "Add"
     }
 }
-async function checkForDuplicates(title, description) {
+async function checkForDuplicates(title, authorName, description) {
     try {
       const querySnapshot = await getDocs(collection(db, 'items'));
       const isDuplicate = querySnapshot.docs.some(doc => {
         const data = doc.data();
         return (
           data.title === title &&
+          data.authorName === authorName &&
           data.description === description &&
           !data.deleted
         );
@@ -188,7 +189,7 @@ async function addItem() {
       return;
     }
 
-    const isDuplicate = await checkForDuplicates(title, description);
+    const isDuplicate = await checkForDuplicates(title, authorName, description);
 
     if (isDuplicate) {
       alert("An item with this title and description already exists.");
