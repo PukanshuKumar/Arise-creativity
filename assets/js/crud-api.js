@@ -531,3 +531,52 @@ function listenForChanges() {
 
   // Call the function
 //   removeFirestoreDuplicates();
+
+// Fetch a random quote from Firestore
+async function getRandomQuote() {
+  const iconElement = document.getElementById('getNewQuotesIcons');
+  const buttonElement = iconElement.closest('button'); // Find the parent button
+
+  iconElement.classList.add('fa-spin');
+  if (buttonElement) {
+    buttonElement.setAttribute('disabled', 'true');
+}
+  try {
+      const querySnapshot = await getDocs(collection(db, "items"));
+      const items = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const nonDeletedItems = items.filter(item => !item.deleted);
+
+      if (nonDeletedItems.length === 0) {
+          console.error("No quotes available");
+          return;
+      }
+
+      // Select a random quote
+      const randomIndex = Math.floor(Math.random() * nonDeletedItems.length);
+      const randomQuote = nonDeletedItems[randomIndex];
+
+      // Update the UI with the random quote
+      const quotesDescription = document.getElementById('quotesDescription');
+      const quotesAuthorName = document.getElementById('quotesAuthorName');
+
+      quotesDescription.innerHTML = `${randomQuote.description}`;
+      quotesAuthorName.innerHTML = `${randomQuote.authorName}`;
+  } catch (error) {
+      console.error("Error fetching random quote:", error);
+  } finally {
+    // Remove the class after 2 seconds
+    setTimeout(() => {
+        iconElement.classList.remove('fa-spin');
+        if (buttonElement) {
+          buttonElement.removeAttribute('disabled');
+      }
+    }, 2000);
+}
+}
+
+// Set up a timer to fetch a new quote every hour
+setInterval(getRandomQuote, 3600000); // 3600000ms = 1 hour
+
+// Call the function initially to load the first quote
+getRandomQuote();
+window.getRandomQuote = getRandomQuote;
