@@ -575,7 +575,7 @@ async function getRandomQuote() {
 }
 
 // Set up a timer to fetch a new quote every hour
-setInterval(getRandomQuote, 3600000); // 3600000ms = 1 hour
+setInterval(getRandomQuote, 86400000); // 3600000ms = 1 hour
 
 // Call the function initially to load the first quote
 getRandomQuote();
