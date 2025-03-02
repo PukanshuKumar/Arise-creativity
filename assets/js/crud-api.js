@@ -504,6 +504,31 @@ function listenForChanges() {
   listenForChanges();
 
 
+  // async function removeFirestoreDuplicates() {
+  //   const querySnapshot = await getDocs(collection(db, 'items'));
+
+  //   const seen = new Set();
+  //   const duplicates = [];
+
+  //   for (let docSnapshot of querySnapshot.docs) {
+  //     const book = docSnapshot.data();
+  //     const uniqueKey = `${book.title}-${book.authorName}`;
+
+  //     if (seen.has(uniqueKey)) {
+  //       duplicates.push(docSnapshot.id);
+  //     } else {
+  //       seen.add(uniqueKey);
+  //     }
+  //   }
+
+  //   for (const docId of duplicates) {
+  //     await deleteDoc(doc(db, 'items', docId));
+  //     console.log(`Deleted duplicate: ${docId}`);
+  //   }
+
+  //   console.log('Deduplication process complete');
+  // }
+
   async function removeFirestoreDuplicates() {
     const querySnapshot = await getDocs(collection(db, 'items'));
 
@@ -511,23 +536,27 @@ function listenForChanges() {
     const duplicates = [];
 
     for (let docSnapshot of querySnapshot.docs) {
-      const book = docSnapshot.data();
-      const uniqueKey = `${book.title}-${book.authorName}`;
+        const book = docSnapshot.data();
+        const uniqueKey = `${book.title}-${book.authorName}-${book.description}`;
 
-      if (seen.has(uniqueKey)) {
-        duplicates.push(docSnapshot.id);
-      } else {
-        seen.add(uniqueKey);
-      }
+        if (seen.has(uniqueKey)) {
+            duplicates.push(docSnapshot.id); // Store duplicate document ID for deletion
+        } else {
+            seen.add(uniqueKey);
+        }
     }
 
-    for (const docId of duplicates) {
-      await deleteDoc(doc(db, 'items', docId));
-      console.log(`Deleted duplicate: ${docId}`);
+    // Delete duplicates
+    for (let duplicateId of duplicates) {
+        await deleteDoc(doc(db, 'items', duplicateId));
+        console.log(`Deleted duplicate document: ${duplicateId}`);
     }
 
-    console.log('Deduplication process complete');
-  }
+    console.log("Duplicate removal completed.");
+    init(); // Refresh the displayed items
+}
+
+window.removeFirestoreDuplicates = removeFirestoreDuplicates;
 
   // Call the function
 //   removeFirestoreDuplicates();

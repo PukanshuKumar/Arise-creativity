@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <div id="manga-list"></div>
+
+
+    <script src="vendors/js/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.1.3/owl.carousel.min.js"></script>
+    <script src="vendors/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const BASE_URL = "https://api.mangadex.org/manga";
+
+async function getLatestManga() {
+    const response = await fetch(`${BASE_URL}?order[latestUploadedChapter]=desc&limit=10`);
+    const data = await response.json();
+
+    // Display manga
+    console.log(data.data);
+    displayMangaList(data.data);
+}
+
+function displayMangaList(mangaList) {
+    const container = document.getElementById("manga-list");
+    container.innerHTML = ""; // Clear previous content
+
+    mangaList.forEach(manga => {
+        const title = manga.attributes.title.en || "No title";
+        const id = manga.id;
+
+        const mangaCard = `<div class="manga-card">
+            <h3>${title}</h3>
+            <a href="detail.html?id=${id}">View Details</a>
+        </div>`;
+
+        container.innerHTML += mangaCard;
+    });
+}
+
+// Call function on page load
+getLatestManga();
+
+    </script>
+</body>
+</html>
